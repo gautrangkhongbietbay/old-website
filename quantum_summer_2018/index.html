@@ -1,0 +1,1038 @@
+<html>
+    <head>
+        <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        .C1_column {
+          float: left;
+          width: 33.33%;
+          padding: 5px;
+        }
+
+        .C1_row::after 
+        {
+          content: "";
+          clear: both;
+          display: table;
+        }
+
+        @media screen and (max-width: 500px) 
+        {
+          .C1_column {
+            width: 100%;
+          }
+        }
+        a
+        {
+            color: #3535FF;
+        }
+        .SectionTitle
+        {
+            font-size:20px;
+            font-weight: bold;
+        }
+        </style>
+    </head>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <body>
+    <div id="top"/>
+    <div class="TableOfContents" id="tblContent">
+        <div class="SectionTitle">Contents</div>
+        <ul style="list-style-type:none">
+            <li><a href="#Section2">A1 - Generate superposition of all basis states</a></li>
+            <li><a href="#Section3">A2 - Generate superposition of zero state and a basis state</a></li>
+            <li><a href="#Section4">A3 - Generate superposition of two basis states</a></li>
+            <li><a href="#Section5">A4 - Generate W state</a></li>
+            <li><a href="#Section6">B1 - Distinguish zero state and W state</a></li>
+            <li><a href="#Section7">B2 - Distinguish GHZ state and W state</a></li>
+            <li><a href="#Section8">B3 - Distinguish four 2-qubit states</a></li>
+            <li><a href="#Section9">B4 - Distinguish four 2-qubit states - 2</a></li>
+            <li><a href="#Section10">C1 - Distinguish zero state and plus state with minimum error</a></li>
+            <li><a href="#Section11">C2 - Distinguish zero state and plus state without errors</a></li>
+            <li><a href="#Section12">D1 - Oracle for f(x) = b * x mod 2</a></li>
+            <li><a href="#Section13">D2 - Oracle for f(x) = b * x + (1 - b) * (1 - x) mod 2</a></li>
+            <li><a href="#Section14">D3 - Oracle for majority functions</a></li>
+            <li><a href="#Section15">E1 - Bernstein-Vazirani algorithm</a></li>
+            <li><a href="#Section16">E2 - Another array reconstruction algorithm</a></li>
+        </ul>
+    </div>
+    <div class="Section" id="Section1">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">Concept & Glossary
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            
+
+        </div>
+    </div>
+
+    <div class="Section" id="Section2">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">A1 - <a href="https://codeforces.com/contest/1002/problem/A1">Generate superposition of all basis states</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to generate the equal superposition of all basis states: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/basis_state.svg"/>.</p>
+            </div>
+            <div class="Answer">
+                <p>It's quite obvious that applying <code>H()</code> to each qubit will produce the desired result. The editorial provides an explaination on how this algorithm works using the concept of tensor product, and from that, we can use induction to prove the algorithm.</p>
+                <p>Another way to see how this algorithm works, without much formality, is to think that for every basis state, <code>H()</code> "splits" a qubit in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> state into <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/> with equal probability. Trivially, for 1 qubit, applying <code>H()</code> on the qubit produces all basis states with equal probability. Suppose the algorithm produces all basis states with equal probability for n qubits. Suppose we apply <code>H()</code> on qubit n+1, which was in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> state before we apply <code>H()</code>. We know that all possible basis states of n+1 qubits are generated from every basis state of n qubits followed by either <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> or <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/>. This algorithm generates all the basis states of n+1 qubits in the same way: for every basis state of n qubits, it "splits" the qubit n+1 to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/>.  Moreover, the algorithm produces the basis states with equal probability since we have all basis states of n qubits with equal probability, and <code>H()</code> "splits" with equal probability. By induction, we get the desired result.
+                </p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : ()
+    {
+        body
+        {
+            let n = Length(qs);
+            for (i in 0..n-1)
+            {
+                H(qs[i]);
+            }
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section3">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">A2 - <a href="https://codeforces.com/contest/1002/problem/A2">Generate superposition of zero state and a basis state</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to generate an equal superposition of the zero state and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi.svg"/> state: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/A2_state.svg"/>. The basis state <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi.svg"/> is represented by an array of boolean <code>bits</code>, and <code>bits[0]</code> is always <code>true</code>.</p>
+            </div>
+            <div class="Answer">
+                <p>It's obvious that applying <code>H()</code> once creates two basis states with equal probability, and we should apply on a qubit that is different between the two states. It is given the first bit of <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi.svg"/> is <code>1</code>, so we can apply <code>H()</code> on the first qubit. At this point, we have two possible states: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/zero_state.svg"/> and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/one_zero_state.svg"/>. We can use the first qubit as a control bit of <code>CNOT()</code> to flip other bits of <img style="vertical-align:middle" class="braket_svg_2" src="./assets/one_zero_state.svg"/> to produce <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi.svg"/>.</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+    operation Solve (qs : Qubit[], bits : Bool[]) : ()
+    {
+        body
+        {
+            let n = Length(qs);
+            let true_bit = 0;
+            H(qs[true_bit]);
+            for (i in 1..n-1)
+            {
+                if (bits[i] == true)
+                {
+                    CNOT(qs[true_bit], qs[i]);
+                }
+            }
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section4">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">A3 - <a href="https://codeforces.com/contest/1002/problem/A3">Generate superposition of two basis states</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to generate the equal superposition <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi0.svg"/> state and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi1.svg"/> state: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/A3_state.svg"/>. We are given that <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi0.svg"/> state and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketpsi1.svg"/> state are respectively represented by arrays of boolean <code>bits0</code> and <code>bits1</code>, and the arrays are not the same.</p>
+            </div>
+            <div class="Answer">
+                <p>The solution is a bit tedious. The idea is to find the first bit that is different between the two states and then apply <code>H()</code> on the corresponding qubit. After that, we use this qubit as a controlling qubit of <code>CNOT()</code> to flip the bit at other positions. More specificly, we will iterate through each position. Let say we are at position <code>i</code>. Suppose the first different bit is at position <code>diff_bit</code>. If the bits at position <code>i</code> are different, such as <code>bits0[i] == true</code> and <code>bits1[i] == false</code>, then if <code>bits0[diff_bit] == true</code>, we use <code>CNOT()</code> with qubit at <code>diff_bit</code> as the controlling bit to flip qubit at position <code>i</code>. However, if <code>bits0[diff_bit] == false</code>, we need to apply <code>X()</code> to qubit at <code>diff_bit</code> before applying <code>CNOT()</code>, since for every basis state, <code>CNOT()</code> does not flip the target bit if the controlling bit is not <code>1</code>. We need to apply <code>X()</code> afterwards to put the qubit at position  <code>diff_bit</code> back to the correct state. </p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[], bits0 : Bool[], bits1 : Bool[]) : ()
+    {
+        body
+        {
+            let N = Length(qs);
+            mutable diff_bit = -1;
+            mutable diff_bit_0 = false;
+
+            repeat 
+            { 
+                set diff_bit = diff_bit + 1; 
+                set diff_bit_0 = bits0[diff_bit]; 
+            }
+            until (bits0[diff_bit] != bits1[diff_bit])
+            fixup {}
+
+            H(qs[diff_bit]);
+            for (i in 0..diff_bit-1)
+            {
+                if (bits0[i] && bits1[i])
+                {
+                    X(qs[i]);
+                }
+                elif (bits0[i] && !bits1[i])
+                {
+                    if (diff_bit_0)
+                    {
+                        CNOT(qs[diff_bit], qs[i]);
+                    }
+                    else
+                    {
+                        X(qs[diff_bit]);
+                        CNOT(qs[diff_bit], qs[i]);
+                        X(qs[diff_bit]);
+                    }
+                }
+                elif (!bits0[i] && bits1[i])
+                {
+                    if (!diff_bit_0)
+                    {
+                        CNOT(qs[diff_bit], qs[i]);
+                    }
+                    else
+                    {
+                        X(qs[diff_bit]);
+                        CNOT(qs[diff_bit], qs[i]);
+                        X(qs[diff_bit]);
+                    }
+                }
+            }
+
+            for (i in diff_bit+1..N-1)
+            {
+                if (bits0[i] && bits1[i])
+                {
+                    X(qs[i]);
+                }
+                elif (bits0[i] && !bits1[i])
+                {
+                    if (diff_bit_0)
+                    {
+                        CNOT(qs[diff_bit], qs[i]);
+                    }
+                    else
+                    {
+                        X(qs[diff_bit]);
+                        CNOT(qs[diff_bit], qs[i]);
+                        X(qs[diff_bit]);
+                    }
+                }
+                elif (!bits0[i] && bits1[i])
+                {
+                    if (!diff_bit_0)
+                    {
+                        CNOT(qs[diff_bit], qs[i]);
+                    }
+                    else
+                    {
+                        X(qs[diff_bit]);
+                        CNOT(qs[diff_bit], qs[i]);
+                        X(qs[diff_bit]);
+                    }
+                }
+            }
+
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section5">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">A4 - <a href="https://codeforces.com/contest/1002/problem/A4">Generate W state</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to generate the W state: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/W_state.svg"/> for some <img style="vertical-align:middle" class="braket_svg_2" src="./assets/N.svg"/> that is a power of 2.</p>
+            </div>
+            <div class="Answer">
+                <p>The idea is to create W state incrementally starting from 1 qubit until we get the desired result. At each step, we create W state for <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/2k.svg"/> qubits from W state of <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/2k1.svg"/> qubits. The following describes how to create W state for 8 qubits assuming that the qubits are in W state of 4 qubits. First, we apply <code>H()</code> to fourth qubit to double the amount of basis states, and by doing so, we make the fourth bit a flag indicating a newly created basis state. On the first <code>for</code> loop, for every state that has bit <code>i</code> is <code>1</code> and bit <code>4</code> is <code>1</code>, we turn on bit <code>i+4</code> and bit <code>0</code>. The latter bit is turned on in order to turn off bit <code>0</code> of all new basis states. This is done after the <code>for</code> loop by applying <code>CNOT()</code> using flag bit <code>4</code> as the controlling bit, and bit <code>0</code> as the target bit. Finally, we use bit <code>i+4</code> to turn off the flag bit <code>4</code> and the old bit <code>i</code>. The following figure describes the above algorithm,
+                </p>
+                <div style="overflow: auto;">
+                    <img style="vertical-align:middle;" class="braket_svg_5" src="./assets/A4_seq.svg"/>
+                </div>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : ()
+    {
+        body
+        {
+            let n = Length(qs);
+            mutable k = 0;
+            if   (n == 1)  { set k = 0; }
+            elif (n == 2)  { set k = 1; }
+            elif (n == 4)  { set k = 2; }
+            elif (n == 8)  { set k = 3; }
+            elif (n == 16) { set k = 4; }
+            let power2 = [1; 2; 4; 8; 16];
+            X(qs[0]);
+            for (i in 1..k)
+            {
+                H(qs[power2[i-1]]);
+                for (j in 1..power2[i-1]-1)
+                {
+                    CCNOT(qs[j], qs[power2[i-1]], qs[power2[i-1]+j]);
+                    CCNOT(qs[j], qs[power2[i-1]], qs[0]);
+                }
+                CNOT(qs[power2[i-1]], qs[0]);
+                for (j in power2[i-1]+1..power2[i]-1)
+                {
+                    CNOT(qs[j], qs[j-power2[i-1]]);
+                    CNOT(qs[j], qs[power2[i-1]]);
+                }
+            }
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section6">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">B1 - <a href="https://codeforces.com/contest/1002/problem/B1">Distinguish zero state and W state</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>We are given N qubits that are in either of the following states:</p>
+                <p class="tab">
+                    <table style="border:0">
+                        <tr>
+                            <td>Zero state:</td> 
+                            <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/zero_state.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td>W state:</td>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/W_state.svg"/></td>
+                        </tr>
+                    </table>
+                </p>
+                <p>The problem asks us to determine the state of the qubits; the resulting state is irrelevant.</p>
+            </div>
+            <div class="Answer">
+                <p>Since the resulting state is irrelevant, we are able use <code class="CodeFunctionM">M()</code> to measure a qubit. The W state always has one qubit that is measured to <code class="CodeConstantOne">One</code>, while the zero state has all <code class="CodeConstantZero">Zero</code> qubits. Therefore, if we measure every qubit and hit <code class="CodeConstantOne">One</code>, the qubits are in W state. Otherwise, they are in zero state. The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : Int
+    {
+        body
+        {
+            let N = Length(qs);
+            for (i in 0..N-1)
+            {
+                if (M(qs[i]) == One)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section7">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">B2 - <a href="https://codeforces.com/contest/1002/problem/B2">Distinguish GHZ state and W state</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>We are given N qubits that are in either of the following states:</p>
+                <p class="tab">
+                    <table style="border:0">
+                        <tr>
+                            <td>GHZ state:</td> 
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/GHZ_state.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td>W state:</td>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/W_state.svg"/></td>
+                        </tr>
+                    </table>
+                </p>
+                <p>The problem asks us to determine the state of the qubits; the resulting state is irrelevant.</p>
+            </div>
+            <div class="Answer">
+                <p>Since the resulting state is irrelevant, we are able use <code class="CodeFunctionM">M()</code> to measure a qubit. The W state always has one qubit that is measured to <code class="CodeConstantOne">One</code>, while the GHZ either has all <code class="CodeConstantZero">Zero</code> qubits or all <code class="CodeConstantOne">One</code> qubits. Observe that we can determine the state if we can determine whether there are zero, one or more than one qubits that are measured to <code class="CodeConstantOne">One</code>. One approach is to measure the first qubit first:</p>
+                <table border="1" style="border-collapse: collapse">
+                    <tr>
+                        <th>First qubit</th>
+                        <th>The rest</th>
+                        <th>State</th>
+                    </tr>
+                    <tr>
+                        <td rowspan="2"><code class="CodeConstantZero">Zero</code></td>
+                        <td>None is <code class="CodeConstantOne">One</code></td>
+                        <td>GHZ state</td>
+                    </tr>
+                    <tr>
+                        <td>At least 1 <code class="CodeConstantOne">One</code></td>
+                        <td>W state</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2"><code class="CodeConstantOne">One</code></td>
+                        <td>None is <code class="CodeConstantOne">One</code></td>
+                        <td>W state</td>
+                    </tr>
+                    <tr>
+                        <td>At least 1 <code class="CodeConstantOne">One</code></td>
+                        <td>GHZ state</td>
+                    </tr>
+                </table>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : Int
+    {
+        body
+        {
+            // |GHZ>: (start 0 end 0) OR (start 1 end 1)
+            // |W>  : (start 0 end 1) OR (start 1 end 0)
+            mutable start = false;
+            mutable end = false;
+            let N = Length(qs);
+            set start = (M(qs[0]) == One);
+            for (i in 1..N-1)
+            {
+                set end = end || (M(qs[i]) == One);
+            }
+            if (start == end)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+    }
+}</pre>
+                <p>The editorial has a simpler approach, as it simply counts the number of qubits measured to <code class="CodeConstantOne">One</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section8">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">B3 - <a href="https://codeforces.com/contest/1002/problem/B3">Distinguish four 2-qubit states</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>We are given 2 qubits that are in one of the following states:</p>
+                <p class="tab">
+                    <table style="border:0">
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B3_S0.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B3_S1.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B3_S2.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B3_S3.svg"/></td>
+                        </tr>
+                    </table>
+                </p>
+                <p>The problem asks us to determine the state of the qubits; the resulting state is irrelevant. The program returns 0 if the qubits are in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/S0.svg"/>, 1 if the qubits are in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/S1.svg"/>, and so on.</p>
+            </div>
+            <div class="Answer">
+                <p>There are a few operations we could use before measuring the qubits, such as:</p>
+                <table border="1" style="border-collapse: collapse">
+                    <tr>
+                        <th>Operation</th>
+                        <th align="left">Effects</th>
+                    </tr>
+                    <tr>
+                        <td><code>H()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/H.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>X()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>Y()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/YEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>Z()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/ZEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>CNOT()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/> if the control qubit is <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>CCNOT()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/> if BOTH control qubits are <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                    </tr>
+                </table>
+                <p>Some observations:</p>
+                <ul>
+                    <li><code>H()</code> is useful for measurement, as it transforms a superposed state to a basis state, which always produces the same result when measured.</li>
+                    <li>Applying <code>H()</code> to qubit 1 results in every state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Si.svg"/> having its qubit 1 in a basis state.</li>
+                    <li>Applying <code>H()</code> again to qubit 0 results in every state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Si.svg"/> having its qubit 0 in a basis state.</li>
+                </ul>
+                <p>The state of the qubits when <code>H()</code> is applied to qubit 1 and qubit 0 sequentially:</p>
+                <div style="overflow: auto;">
+                    <img style="vertical-align:middle;" class="braket_svg_5" src="./assets/B3_seq.svg"/>
+                </div>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : Int
+    {
+        body
+        {
+            H(qs[0]);
+            H(qs[1]);
+            let qubit0 = (M(qs[0]) == One);
+            let qubit1 = (M(qs[1]) == One);
+            if (!qubit0 && !qubit1) { return 0; }
+            elif (!qubit0 && qubit1) { return 1; }
+            elif (qubit0 && !qubit1) { return 2; }
+            //elif (qubit0 && qubit1) { return 3; }
+            return 3;
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section9">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">B4 - <a href="https://codeforces.com/contest/1002/problem/B4">Distinguish four 2-qubit states - 2</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>We are given 2 qubits that are in one of the following states:</p>
+                <p class="tab">
+                    <table style="border:0">
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B4_S0.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B4_S1.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B4_S2.svg"/></td>
+                        </tr>
+                        <tr>
+                            <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/B4_S3.svg"/></td>
+                        </tr>
+                    </table>
+                </p>
+                <p>The problem asks us to determine the state of the qubits; the resulting state is irrelevant. The program returns 0 if the qubits are in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/S0.svg"/>, 1 if the qubits are in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/S1.svg"/>, and so on.</p>
+            </div>
+            <div class="Answer">
+                <p>There are a few operations we could use before measuring the qubits, such as:</p>
+                <table border="1" style="border-collapse: collapse">
+                    <tr>
+                        <th>Operation</th>
+                        <th align="left">Effects</th>
+                    </tr>
+                    <tr>
+                        <td><code>H()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_2" src="./assets/H.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>X()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>Y()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/YEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>Z()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/ZEffects.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>CNOT()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/> if the control qubit is <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                    </tr>
+                    <tr>
+                        <td><code>CCNOT()</code></td>
+                        <td><img style="vertical-align:middle" class="braket_svg_1" src="./assets/XEffects.svg"/> if BOTH control qubits are <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                    </tr>
+                </table>
+                <p>Some observations:</p>
+                <ul>
+                    <li><code>H()</code> is useful for measurement, as it transforms a superposed state to a basis state, which always produces the same result when measured.</li>
+                    <li>Unlike problem B3, applying <code>H()</code> to qubit 1 does not result in every state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Si.svg"/> having its qubit 1 in a basis state. However, we can simply use <code>CNOT()</code> with qubit 0 as the control qubit to flip qubit 1, and we have qubit 1 in a basis state for every <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Si.svg"/> as the result.</li>
+                    <li>Applying <code>H()</code> again to qubit 0 results in every state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Si.svg"/> having its qubit 0 in a basis state.</li>
+                </ul>
+                <p>The state of the qubits when <code>H()</code> is applied to qubit 1 and qubit 0 sequentially:</p>
+                <div style="overflow: auto;">
+                    <img style="vertical-align:middle;" class="braket_svg_5" src="./assets/B4_seq.svg"/>
+                </div>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (qs : Qubit[]) : Int
+    {
+        body
+        {
+            H(qs[1]);
+            CNOT(qs[0], qs[1]);
+            H(qs[0]);
+            let qubit1 = (M(qs[1]) == One);
+            let qubit0 = (M(qs[0]) == One);
+            if (!qubit0 && !qubit1) { return 3; }
+            elif (!qubit0 && qubit1) { return 1; }
+            elif (qubit0 && !qubit1) { return 2; }
+            //elif (qubit0 && qubit1) { return 0; }
+            return 0;
+        }
+    }
+}</pre>
+                <p>The editorial uses <code>SWAP</code> and <code>(Control Z)</code> gates.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="Section" id="Section10">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">C1 - <a href="https://codeforces.com/contest/1002/problem/C1">Distinguish zero state and plus state with minimum error</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to distinguish the follow states: <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ket0.svg"/> and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/plus_state.svg"/>. The program returns <code>0</code> if the qubit is in zero state, and returns 1 if the qubit is in the plus state, and the return value must be correct at least 80% of times. We are provided that <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ket0.svg"/> and <img style="vertical-align:middle" class="braket_svg_2" src="./assets/ketplus.svg"/> appear with the probability of 50% each.</p>
+            </div>
+            <div class="Answer">
+                <p>Let <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/A.svg"/> be the event that the qubit is in <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/Zero.svg"/> state, and <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/negA.svg"/> be the event that the qubit is in <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/ketplus.svg"/> state.</p>
+                <p>Let <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/B.svg"/> be the event that the qubit is measured to <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/Zero.svg"/> state, and <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/negB.svg"/> be the event that the qubit is measured to <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/ketplus.svg"/> state.</p>
+                <p>Let <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/C.svg"/> be the event that the qubit is evaluated correctly.</p>
+                <p>We have <img style="vertical-align:middle;" class="braket_svg_1" src="./assets/PAPnegA05.svg"/>.</p>
+                <p>The probability that the qubit state is evaluated correctly:</p>
+                <p><img style="vertical-align:middle;" class="braket_svg_1" src="./assets/PABnegAnegB.svg"/></p>
+                <p>Suppose we return <code>0</code> when the qubit is measured to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/>, and return <code>1</code> when the qubit is measured to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/>. From the equation, we need to calculate the probabilty that the qubit is measure to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> when it is in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> state, and the probabilty that the qubit is measure to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/> when it is in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketplus.svg"/> state.</p>
+                <div class="C1_row">
+                    <div class="C1_column">
+                        <figure>
+                            <img style="vertical-align:middle; width:100%" class="braket_svg_1" src="./assets/C1_sphere.svg"/>
+                            <figcaption align="center" >State <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketpsi.svg"/> in Bloch sphere</figcaption>
+                        </figure>
+                    </div>
+                    <div class="C1_column">
+                        <figure>
+                            <img style="vertical-align:middle; width:100%" class="braket_svg_1" src="./assets/C1_zero_plus.svg"/>
+                            <figcaption align="center" >State <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketplus.svg"/> in Bloch sphere</figcaption>
+                        </figure>
+                    </div>
+                    <div class="C1_column">
+                        <figure>
+                            <img style="vertical-align:middle; width:100%" class="braket_svg_1" src="./assets/C1_zero_plus_rotate_y.svg"/>
+                            <figcaption align="center" >State <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketplus.svg"/> after being rotated by an angle of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/alpha.svg"/> about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> axis in Bloch sphere</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <p>A pure state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketpsi.svg"/> can be written as: <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketpsieq.svg"/>, where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/theta.svg"/> is the angle of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketpsi.svg"/> with respect to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/>-axis, and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/varphi.svg"/> is the angle of the projection of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketpsi.svg"/> to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capXcapY.svg"/> surface with respect to <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX.svg"/>-axis. State <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> has <img style="vertical-align:middle" class="braket_svg_1" src="./assets/theta0.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/varphi0.svg"/>; and state <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketplus.svg"/> has <img style="vertical-align:middle" class="braket_svg_1" src="./assets/thetapi2.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/varphi0.svg"/>.</p>
+                <p>Suppose we measure the qubit on Pauli <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/> basis. We can rotate the qubit about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX.svg"/>, <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>, or <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/> axis to maximize the probability. There are many ways to rotate the qubit. We'll examinate 3 options: rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX.svg"/>-axis, rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>-axis, and rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/>-axis.</p>
+                <p>Let <img style="vertical-align:middle" class="braket_svg_1" src="./assets/S0.svg"/> denote the state of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/> after being rotated; and let <img style="vertical-align:middle" class="braket_svg_1" src="./assets/Splus.svg"/> denote the state of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/ketplus.svg"/> after being rotated.</p>
+                <p>Note that we can use rotation operators to figure out the state of the qubit after being rotated, but for this problem, the state is quite easy to obtain visually.</p>
+                <p>Case 1: rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX.svg"/>-axis an angle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/alpha.svg"/></p>
+                <p>
+                    We have:
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_5" src="./assets/C1_S0_X.svg"/>
+                    <br/>
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_7" src="./assets/C1_Splus_X.svg"/>
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_7" src="./assets/C1_maxPC_X.svg"/>
+                    <br/>
+                    So, on average, rotating about <img style="vertical-align:middle" class="braket_svg_7" src="./assets/capX.svg"/>-axis does not produce the result that is correct on at least 80% of times.
+                </p>
+                <p>Case 2: rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>-axis an angle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/alpha.svg"/></p>
+                <p>
+                    We have:
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_5" src="./assets/C1_S0_Y.svg"/>
+                    <br/>
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_7" src="./assets/C1_Splus_Y.svg"/>
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_7" src="./assets/C1_PC_Y.svg"/>
+                    <br/>
+                    <img style="vertical-align:middle" class="braket_svg_7" src="./assets/C1_maxPC_Y.svg"/>
+                    <br/>
+                    So, on average, rotating by an angle of <img style="vertical-align:middle" class="braket_svg_7" src="./assets/pi4.svg"/> about <img style="vertical-align:middle" class="braket_svg_7" src="./assets/capY.svg"/>-axis produces the result that is correct on 85% of times.
+                </p>
+                <p>Case 3: rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/>-axis an angle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/alpha.svg"/></p>
+                <p>We will perform measurement on Pauli <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/> basis, so rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capZ.svg"/>-axis by any angle does not affect the result of the measurement. From case 1, we learn that measuring the orginal qubit has the accuracy of 0.75 on average.</p>
+                <p>From the three cases, rotating about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>-axis is the best option. The following implementation perform a rotation of an angle of about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/pi4.svg"/> about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>-axis</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (q : Qubit) : Int
+    {
+        body
+        {
+            R(PauliY, 3.14159/4.0, q);
+            if (M(q) == Zero)
+            {
+                return 0;
+            }
+            return 1;
+        }
+    }
+}</pre>
+            <p>The program will be tested 1000 times, so in order to pass the test, the program needs to be correct on at least 800 cases. Assume that the test is random, how better is the accuracy of 0.85 compared to the accuracy of 0.75?</p>
+            <p>Let <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX_1.svg"/> be the random variable indicating the number of correct results when no rotation is performed. <img style="vertical-align:middle" class="braket_svg_1" src="./assets/C1_X1Binomial.svg"/>. The probability of passing the test is <img style="vertical-align:middle" class="braket_svg_1" src="./assets/C1_prob_X1.svg"/></p>
+            <p>Let <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capX_2.svg"/> be the random variable indicating the number of correct results when we rotate the qubit by an angle of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/pi4.svg"/> about <img style="vertical-align:middle" class="braket_svg_1" src="./assets/capY.svg"/>-axis. <img style="vertical-align:middle" class="braket_svg_1" src="./assets/C1_X2Binomial.svg"/>. The probability of passing the test is <img style="vertical-align:middle" class="braket_svg_1" src="./assets/C1_prob_X2.svg"/></p>
+            <p>So by improving the accuracy by 10%, we improve the probability of passing the test from almost 0 to nearly 1.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section11">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">C2 - <a href="https://codeforces.com/contest/1002/problem/C2">Distinguish zero state and plus state without errors</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <p>Please refer to the editorial.</p>
+        </div>
+    </div>
+
+
+    <div class="Section" id="Section12">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">D1 - <a href="https://codeforces.com/contest/1002/problem/D1">Oracle for f(x) = b * x mod 2</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to implement a quantum oracle for function <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_f.svg"/> where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_bvector.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_xvector.svg"/>. More specificly, we need to compute a qubit <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> as in the oracle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_O.svg"/>.</p>
+            </div>
+            <div class="Answer">
+                <p>Let <img style="vertical-align:middle" class="braket_svg_1" src="./assets/setA.svg"/> be the set of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/i.svg"/> where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi1.svg"/>. Those are some observations:
+                    <ul>
+                        <li>If <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi0.svg"/> for some <img style="vertical-align:middle" class="braket_svg_1" src="./assets/i.svg"/>, then <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bixi0.svg"/> regardless the value of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/xi.svg"/>.</li>
+                        <li>For all <img style="vertical-align:middle" class="braket_svg_1" src="./assets/i.svg"/> where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi1.svg"/>, <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bixixi.svg"/>.</li>
+                        <li>Note that <code>XOR</code> can be used to find the sum of 0's and 1's <code>mod</code> 2, i.e. the parity of the number of 1's of the input. So <img style="vertical-align:middle" class="braket_svg_3" src="./assets/D1_f2.svg"/>. Therefore, the oracle can be written as <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_O2.svg"/>, where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_yf.svg"/>.</li>
+                        <li><code>CNOT()</code> can be used to implement <code>XOR</code> between 2 qubits by using the control qubit and the target qubit as an input, and the target qubit as the output.
+                            <br/>
+                            <table border="1" style="border-collapse: collapse">
+                                <tr>
+                                    <th colspan="2"> Input</th>
+                                    <th colspan="2"> Output</th>
+                                    <th> Expected</th>
+                                </tr>
+                                <tr>
+                                    <td align="center">Control</td>
+                                    <td align="center">Target</td>
+                                    <td align="center">Control</td>
+                                    <td align="center">Target</td>
+                                    <td align="center">XOR</td>
+                                </tr>
+                                <tr>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                </tr>
+                                <tr>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                </tr>
+                                <tr>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                </tr>
+                                <tr>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                    <td align="center"><img style="vertical-align:middle" class="braket_svg_1" src="./assets/Zero.svg"/></td>
+                                </tr>
+                            </table>
+
+                        </li>
+                    </ul>
+                </p>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (x : Qubit[], y : Qubit, b : Int[]) : ()
+    {
+        body
+        {
+            for (i in 0..Length(x)-1)
+            {
+                if (b[i] == 1)
+                {
+                    CNOT(x[i], y);
+                }
+            }
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section13">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">D2 - <a href="https://codeforces.com/contest/1002/problem/D2">Oracle for f(x) = b * x + (1 - b) * (1 - x) mod 2</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to implement a quantum oracle for function <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_f.svg"/> where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_bvector.svg"/> and <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_xvector.svg"/>. More specificly, we need to compute a qubit <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> as in the oracle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_O.svg"/>.</p>
+            </div>
+            <div class="Answer">
+                <p>We have <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_fx2.svg"/>, which means <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_fx3.svg"/>. Since <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_2bixi.svg"/> is divided by 2, we have <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_fx4.svg"/>. Those are some observations:
+                    <ul>
+                        <li>
+                            <table border="1" style="border-collapse: collapse;">
+                                <tr>
+                                    <th><img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi.svg"/></th>
+                                    <th><img style="vertical-align:middle" class="braket_svg_1" src="./assets/xi.svg"/></th>
+                                    <th><img style="vertical-align:middle" class="braket_svg_1" src="./assets/1bixi.svg"/></th>
+                                </tr>
+                                <tr>
+                                    <td align="center">0</td>
+                                    <td align="center">0</td>
+                                    <td align="center">1</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">0</td>
+                                    <td align="center">1</td>
+                                    <td align="center">0</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">1</td>
+                                    <td align="center">0</td>
+                                    <td align="center">0</td>
+                                </tr>
+                                <tr>
+                                    <td align="center">1</td>
+                                    <td align="center">1</td>
+                                    <td align="center">-1</td>
+                                </tr>
+                            </table>
+                        </li>
+                        <li>
+                            From problem D1: sum of zeros and ones can be computed using <code>XOR</code>. However, different from problem D1, we compute <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D2_yf.svg"/> instead of <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_yf.svg"/>.
+                        </li>
+                        <li>
+                            For <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi0.svg"/>, <img style="vertical-align:middle" class="braket_svg_1" src="./assets/1bixixibar.svg"/>.
+                        </li>
+                        <li>
+                            For <img style="vertical-align:middle" class="braket_svg_1" src="./assets/bi1.svg"/>, <img style="vertical-align:middle" class="braket_svg_1" src="./assets/1bixixi.svg"/> (the last equal sign is valid since <img style="vertical-align:middle" class="braket_svg_1" src="./assets/1mod21.svg"/>).
+                        </li>
+                        <li>
+                            To do computation with <img style="vertical-align:middle" class="braket_svg_1" src="./assets/xibar.svg"/> without changing the qubit state, we can use <code>X()</code> to flip the qubit, do the computation, and use <code>X()</code> to flip the qubit again.
+                        </li>
+                    </ul>
+                </p>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (x : Qubit[], y : Qubit, b : Int[]) : ()
+    {
+        body
+        {
+            for (i in 0..Length(x)-1)
+            {
+                if (b[i] == 1)
+                {
+                    CNOT(x[i], y);
+                }
+                else
+                {
+                    X(x[i]);
+                    CNOT(x[i], y);
+                    X(x[i]);
+                }
+            }
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section14">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">D3 - <a href="https://codeforces.com/contest/1002/problem/D3">Oracle for majority function</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to implement a quantum oracle for function <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D3_f.svg"/> where <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D3_xvector.svg"/>. More specificly, we need to compute a qubit <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> as in the oracle <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D1_O.svg"/>.</p>
+            </div>
+            <div class="Answer">
+                <p>Some observations:</p>
+                    <ul>
+                        <li>This is more of a bitwise trick: to find whether <img style="vertical-align:middle" class="braket_svg_1" src="./assets/xvector.svg"/> has at least two 1's, we can use <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D3_f2.svg"/>.</li>
+                        <li>We need to compute <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> as in <img style="vertical-align:middle" class="braket_svg_1" src="./assets/D3_O.svg"/>.</li>
+                        <li><code>CCNOT()</code> can be used to flip <img style="vertical-align:middle" class="braket_svg_1" src="./assets/y.svg"/> when two control qubits are <img style="vertical-align:middle" class="braket_svg_1" src="./assets/One.svg"/>.</li>
+                    </ul>
+                </p>
+                <p>The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (x : Qubit[], y : Qubit) : ()
+    {
+        body
+        {
+            CCNOT(x[0], x[1], y);
+            CCNOT(x[1], x[2], y);
+            CCNOT(x[0], x[2], y);
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section15">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">E1 - <a href="https://codeforces.com/contest/1002/problem/E1">Bernstein-Vazirani algorithm</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <div class="Problem">
+                <p>The problem asks us to implement the Bernstein-Vazirani algorithm.</p>
+            </div>
+            <div class="Answer">
+                <p>The detail about the algorithm can be found online. The implementation is as follows,</p>
+                <pre class="prettyprint">
+namespace Solution 
+{
+    open Microsoft.Quantum.Primitive;
+    open Microsoft.Quantum.Canon;
+
+    operation Solve (N : Int, Uf : ((Qubit[], Qubit) => ())) : Int[]
+    {
+        body
+        {
+            mutable rresult = new Int[N];
+            using (qs = Qubit[N])
+            {
+                using (qt = Qubit[1])
+                {
+                    X(qt[0]);
+                    H(qt[0]);
+                    for (i in 0..N-1)
+                    {
+                        H(qs[i]);
+                    }
+                    Uf(qs, qt[0]);
+                    for (i in 0..N-1)
+                    {
+                        H(qs[i]);
+                        if (M(qs[i]) == Zero) { set rresult[i] = 0; } 
+                        else { set rresult[i] = 1; }
+                    }
+                    ResetAll(qt);
+                }
+                ResetAll(qs);
+            }
+            return rresult;
+        }
+    }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="Section" id="Section16">
+        <div class="SectionHeader">
+            <p class="SectionTitle" style="text-align:left;">E2 - <a href="https://codeforces.com/contest/1002/problem/E2">Another array reconstruction algorithm</a>
+            <span style="float:right;"><a href="#top">top</a></span>
+            </p>
+        </div>
+        <div class="SectionContent">
+            <p>Please refer to the editorial.</p>
+        </div>
+    </div>
+    </body>
+
+</html>
