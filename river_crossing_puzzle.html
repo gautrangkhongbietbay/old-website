@@ -1,0 +1,391 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+        <style>
+            #constaint_table
+            {
+                width = 100%;
+            }
+            #constaint_table td
+            {
+                padding: 10px;
+            }
+            a
+            {
+                color: #3535FF;
+            }
+            .header
+            {
+                font-size:15pt;
+                font-weight: bold;
+            }
+            .tab 
+            { 
+                margin-left: 40px; 
+            }
+            code
+            {
+                background-color: #E0E0E0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="top"/>
+        <div class="TableOfContents" id="content_table">
+            <div class="header">Contents</div>
+            <ul style="list-style-type:none">
+                <li><a href="#Problem">Problem</a></li>
+                <li><a href="#Modeling">Modeling the Problem</a></li>
+                <li><a href="#Graphical_Solution">Solution using Graphs</a></li>
+                <li><a href="#ILP_Solution">Solution using Integer Linear Programming</a></li>
+                <li><a href="#Generalization">Generalization</a></li>
+                <li><a href="#References">References</a></li>
+            </ul>
+        </div>
+        <div id="Problem">
+            <div class="header">
+                <p class="title" style="text-align:left;">Problem
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+                <p>
+                River crossing puzzle is a type of puzzle where a number of objects must be transported across a river while certain constraints have to be satisfied. There are many variations of river crossing puzzle, and one of which is Alcuin's river crossing puzzle, which says: 
+                <p class="tab">
+                A farmer needs to transport a wolf, a goat and cabbages across a river. There is a boat which is only able to carry the farmer and one other object. The wolf and the goat cannot stay on the same bank of the river without the farmer's supervision. The goat would eat the cabbages if the farmer does not present. How would all of them cross the river safely?
+                </p>
+                To make the problem more interesting, we can ask: how to solve the problem within the fewest steps?
+                </p>
+            </div>
+        </div>
+        <div id="Modeling">
+            <div class="header">
+                <p class="title" style="text-align:left;">Modeling the Problem
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+                <p>The problem can be solved by exploring all possible moves at each step. Suppose initially, all objects are on the left bank of the river, and the goal is to move all of them to the right bank. To simplify the problem, we ignore the fact there are periods that an object is on the boat, and we only care about the moment that they are on either banks. After a move, an object can only be in two states: either it is on the left bank or on the right bank. Let <code>0</code> indicate the object is on the left bank, and <code>1</code> indicate the object is on the right bank. Let <code>state</code> be a 4-bit variable indicating the positions of all object in the following fashion,
+                </p>
+                <table style="table-layout: fixed; width: 300px; border-collapse: collapse;" border="1">
+                    <tr>
+                        <td style="padding-left: 5px;">Bit 3</td>
+                        <td style="padding-left: 5px;">Bit 2</td>
+                        <td style="padding-left: 5px;">Bit 1</td>
+                        <td style="padding-left: 5px;">Bit 0</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left: 5px;">Farmer</td>
+                        <td style="padding-left: 5px;">Wolf</td>
+                        <td style="padding-left: 5px;">Goat</td>
+                        <td style="padding-left: 5px;">Cabbages</td>
+                    </tr>
+                </table>
+                <p>
+                Initially, all objects are in the state of <code>0000</code> and the goal is to reach the state of <code>1111</code>. However, not all states are possible. Since the wolf and the goat cannot be on the same side without the presence of the farmer, the state of <code>0110</code> and <code>1001</code> are not allowed. Similarly, <code>0011</code> and <code>1100</code> are forbidden as the goat and the cabbages cannot be alone on the same bank. The problem statement also implicitly implies that the wolf, the goat, and the cabbages cannot be on the same side without the farmer, hence <code>1000</code> and <code>0111</code> are not possible states.
+                </p>
+                <p>
+                Out of 16 states, there are 6 states that are not allowed. Therefore, we only have 10 possible states, which means, at most, we need 9 moves to reach the goal.
+                </p>
+            </div>
+        </div>
+        <div id="Graphical_Solution">
+            <div class="header">
+                <p class="title" style="text-align:left;">Solution using Graphs
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+                <p>
+                To represent the problem using graphs, we can construct a graph where each vertex corresponds to a possible state, and each edge connects two states where one of them can be reached after a move from the other. Observe that the farmer changes the side of the bank after a move, and the boat can only carry two objects simultaneously, we connect two states having different bit 3 and they differ at at most 2 bits. When the graph is constructed, we can use any shortest path algorithms to find the fewest number of moves from <code>0000</code> to <code>1111</code>. The full implementation can be found <a href="https://github.com/takekoputa/River-Crossing-Puzzle/blob/master/river_crossing.py">here</a>.
+                </p>
+                <pre class="prettyprint">from itertools import product
+from graph import Graph
+
+g = Graph(directed_graph = True)
+forbidden_states = {0b0110, 0b1001, 0b0011, 0b1100, 0b0111, 0b1000}
+N = 4
+
+# tuple of bools -> binary
+def tuple_to_bin(t):
+    ...
+
+# return the number of different bits
+def hamming_distance(state1, state2):
+    ...
+
+# two states are connected when:
+#   . the farmer's bits are different
+#   . the two states are different at most two positions
+def has_edge(state1, state2):
+    ...
+
+if __name__ == "__main__":
+    # for each possible state, iterate through all possible state and 
+    # determine whether they are connected
+    for state1_tuple in product([0, 1], repeat = N):
+        state1 = tuple_to_bin(state1_tuple)
+        if state1 in forbidden_states:
+            continue
+        for j in product([0, 1], repeat = N-1):
+            state2_tuple = j + (1-state1_tuple[N-1], )
+            state2 = tuple_to_bin(state2_tuple)
+            if state2 in forbidden_states:
+                continue
+            if has_edge(state1_tuple, state2_tuple):
+                g.add_edge(state1, state2)
+    # find the shortest path between the first state and the final state
+    # -> obtain the minimum number of moves to solve the puzzle
+    path = g.shortest_path(0b0000, 0b1111)</pre>
+            Output:
+                <pre class="prettyprint">FWGC|        |____
+    |  (FG)->|
+_W_C|        |F_G_
+    |<-(F_)  |
+FW_C|        |__G_
+    |  (FC)->|
+_W__|        |F_GC
+    |<-(FG)  |
+FWG_|        |___C
+    |  (FW)->|
+__G_|        |FW_C
+    |<-(F_)  |
+F_G_|        |_W_C
+    |  (FG)->|
+____|        |FWGC</pre>
+                <p>
+                This implementation is not space and time efficient, however. Suppose we have \(n\) objects, then at most, we have \(2^n\) states, and \(O(2^{2n})\) edges, so the graph needs \(O(2^n)\) time and \(O(2^n)\) space to construct. If Dijkstra's algorithm is used to find the shortest path, the time complexity would be \(O(n2^n)\). Overall, this implementation has the time complexity of \(O(n2^n)\), and the space complexity of \(O(2^n)\).
+                </p>
+            </div>
+        </div>
+        <div id="ILP_Solution">
+            <div class="header">
+                <p class="title" style="text-align:left;">Solution using Integer Linear Programming
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+            <p>
+            This puzzle can be solved using integer linear programming<a href="#ref1">[1]</a>. The set up is as follows,
+            </p>
+            <table id="constaint_table" style="table-layout: fixed;">
+                <tr>
+                    <td>Objective:</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">\(min \sum_{t=0}^{T} \sum_{i=1}^{3} x(t,i)\)</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Constraints:</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">\(x(0) = (1, 1, 1)\)</td>
+                    <td align="right"></td>
+                    <td>\(x(t,i)\) indicates whether object \(i\) is on the left bank at time \(t\)</td>
+                </tr>
+                <tr>
+                    <td align="right">\(y(0) = (0, 0, 0)\)</td>
+                    <td align="right"></td>
+                    <td>\(y(t,i)\) indicates whether object \(i\) is on the boat time \(t\)</td>
+                </tr>
+                <tr>
+                    <td align="right">\(z(0) = (0, 0, 0)\)</td>
+                    <td align="right"></td>
+                    <td>\(z(t,i)\) indicates whether object \(i\) is on the right bank at time \(t\)</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(
+                        \left.
+\begin{array}{l}
+x(t+1) = x(t) - y(t+1)\\
+z(t+1) = z(t) + y(t+1)
+\end{array}
+\right\}
+\)
+                    </td>
+                    <td align="right">
+                        if \(t\in [0, T]\) and \(t\) is even
+                    </td>
+                    <td>if \(t\) is even, the farmer sails from the left bank to the right bank</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(
+                        \left.
+\begin{array}{l}
+x(t+1) = x(t) + y(t+1)\\
+z(t+1) = z(t) - y(t+1)
+\end{array}
+\right\}
+\)
+                    </td>
+                    <td align="right">
+                        if \(t\in [0, T]\) and \(t\) is odd
+                    </td>
+                    <td>if \(t\) is odd, the farmer sails from the right bank to the left bank</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(y(t,1) + y(t,2) + y(t,3) \leq 1\)
+                    </td>
+                    <td align="right">
+                        \(0\leq t\leq T\)
+                    </td>
+                    <td>at most one object (other than the farmer) is on the boat</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(
+                        \left.
+\begin{array}{r}
+x(t,1) + x(t,2) \leq 1 \\
+x(t,2) + x(t,3) \leq 1 \\
+\end{array}
+\right\}
+\)
+                    </td>
+                    <td align="right">
+                        if \(t\in [0, T]\) and \(t\) is odd                        
+                    </td>
+                    <td>eliminate illegal states of \(x\)</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(
+                        \left.
+\begin{array}{r}
+-z(t, 1) + z(t, 2) + z(t, 3) \leq 1 \\
+z(t, 1) + z(t, 2) - z(t, 3) \leq 1
+\end{array}
+\right\}
+\)
+                    </td>
+                    <td align="right">
+                        if \(t\in [0, T]\) and \(t\) is even                      
+                    </td>
+                    <td>eliminate illegal states of \(z\)</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(z(T) = (1, 1, 1)\)
+                    </td>
+                    <td align="right">
+                    </td>
+                    <td>every one should be on the right bank after \(T\) time</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(0\leq x(t,i),y(t,i),z(t,i)\leq 1\)
+                    </td>
+                    <td align="right">
+                        \(0\leq t \leq T, 1\leq i \leq 3\)
+                    </td>
+                    <td>\(i=1\): wolf, \(i=2\): goat, \(i=3\): cabbages</td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        \(x(t), y(t), z(t) \in \{0,1\}^3\)
+                    </td>
+                    <td align="right">
+                        \(0\leq t\leq T\)
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+            The full implementation on Python can be found <a href="https://github.com/takekoputa/River-Crossing-Puzzle/blob/master/river_crossing_lp.py">here</a>.
+            </div>
+            <pre class="prettyprint">import pulp
+from river_crossing import print_path
+
+TIME = 10
+NUM_OBJS = 3
+
+time = list(range(TIME))
+obj = list(range(NUM_OBJS))
+x = pulp.LpVariable.dicts('x', (time, obj), cat = pulp.LpBinary)
+y = pulp.LpVariable.dicts('y', (time, obj), cat = pulp.LpBinary)
+z = pulp.LpVariable.dicts('z', (time, obj), cat = pulp.LpBinary)
+
+p = pulp.LpProblem(pulp.LpMinimize)                 # objective: minimize sum_{t in time, o in obj}x[t][o]
+p += pulp.lpSum([x[t][o] for t in time for o in obj])
+
+p += x[0][0] == 1                                   # x[0] = (1, 1, 1)
+p += x[0][1] == 1
+p += x[0][2] == 1
+p += y[0][0] == 0                                   # y[0] = (0, 0, 0)
+p += y[0][1] == 0
+p += y[0][2] == 0
+p += z[0][0] == 0                                   # z[0] = (0, 0, 0)
+p += z[0][1] == 0
+p += z[0][2] == 0
+
+for t in range(TIME):
+    if t%2 == 0 and t+1 < TIME:                     # if t is even
+        p += x[t+1][0] - x[t][0] + y[t+1][0] == 0   #   x[t+1] = x[t] - y[t+1]
+        p += x[t+1][1] - x[t][1] + y[t+1][1] == 0
+        p += x[t+1][2] - x[t][2] + y[t+1][2] == 0
+        p += z[t+1][0] - z[t][0] - y[t+1][0] == 0   #   z[t+1] = z[t] + y[t+1]
+        p += z[t+1][1] - z[t][1] - y[t+1][1] == 0
+        p += z[t+1][2] - z[t][2] - y[t+1][2] == 0
+    if t%2 == 1 and t+1 < TIME:                     # if t is odd
+        p += x[t+1][0] - x[t][0] - y[t+1][0] == 0   #   x[t+1] = x[t] + y[t+1]
+        p += x[t+1][1] - x[t][1] - y[t+1][1] == 0
+        p += x[t+1][2] - x[t][2] - y[t+1][2] == 0
+        p += z[t+1][0] - z[t][0] + y[t+1][0] == 0   #   z[t+1] = z[t] + y[t+1]
+        p += z[t+1][1] - z[t][1] + y[t+1][1] == 0
+        p += z[t+1][2] - z[t][2] + y[t+1][2] == 0
+    p += y[t][0] + y[t][1] + y[t][2] <= 1           # y[t,1] + y[t,2] + y[t,3] <= 1 
+    if t%2 == 1:                                    # if t is odd
+        p += x[t][0] + x[t][1] <= 1                 #   x[t,1] + x[t,2]          <= 1
+        p += x[t][1] + x[t][2] <= 1                 #            x[t,2] + x[t,3] <= 1
+    if t%2 == 0:                                    # if t is even
+        p += - z[t][0] + z[t][1] + z[t][2] <= 1     #   z[t,1] + z[t,2] + z[t,3] <= 1
+        p +=   z[t][0] + z[t][1] - z[t][2] <= 1     #   z[t,1] + z[t,2] - z[t,3] <= 1
+
+p += z[TIME-1][0] == 1                              # z[T] = (1, 1, 1)
+p += z[TIME-1][1] == 1
+p += z[TIME-1][2] == 1
+
+p.solve()
+print("Status:", pulp.LpStatus[p.status])
+...</pre>
+        </div>
+        <div id="Generalization">
+            <div class="header">
+                <p class="title" style="text-align:left;">Generalization
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+            <p>
+            <i>Csorba et al</i> paper<a href="#ref2">[2]</a> describes the generalized version of the problem. The authors discuss even more interesting question: given \(n\) objects and certain constraints, what is the minimum capacity of the boat to solve the problem. This number is called "Alcuin number" by the paper. The authors also show that computing Alcuin number of a graph is NP-Hard, and the number can be approximated for certain cases.
+            </p>
+            </div>
+        </div>
+        <div id="References">
+            <div class="header">
+                <p class="title" style="text-align:left;">References
+                <span style="float:right;"><a href="#top">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+                <div id="ref1">
+                    [1] Ralf Borndörfer, Martin Grötschel, and Andreas Löbel, "Alcuin's Transportation Problems and Integer Programming," 1995.
+                </div>
+                <div id="ref2">
+                    [2] P. Csorba, C. A. J. Hurkens, and G. J. Woeginger, “The Alcuin Number of a Graph and Its Connections to the Vertex Cover Number,” <i>SIAM Review</i>, vol. 54, no. 1, pp. 141–154, 2012.
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
