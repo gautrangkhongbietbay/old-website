@@ -41,7 +41,8 @@
                 <li><a href="#Problem">Problem</a></li>
                 <li><a href="#Modeling">Modeling the Problem</a></li>
                 <li><a href="#Graphical_Solution">Solution using Graphs</a></li>
-                <li><a href="#ILP_Solution">Solution using Integer Linear Programming</a></li>
+                <li><a href="#ILP_Shortest_Path_Solution">Solution using the Integer Linear Programming's Shortest Path Formulation</li>
+                <li><a href="#ILP_Solution">Another Solution using Integer Linear Programming</a></li>
                 <li><a href="#Generalization">Generalization</a></li>
                 <li><a href="#References">References</a></li>
             </ul>
@@ -158,8 +159,48 @@ F_G_|        |_W_C
     |  (FG)->|
 ____|        |FWGC</pre>
                 <p>
-                This implementation is not space and time efficient, however. Suppose we have \(n\) objects, then at most, we have \(2^n\) states, and \(O(2^{2n})\) edges, so the graph needs \(O(2^n)\) time and \(O(2^n)\) space to construct. If Dijkstra's algorithm is used to find the shortest path, the time complexity would be \(O(n2^n)\). Overall, this implementation has the time complexity of \(O(n2^n)\), and the space complexity of \(O(2^n)\).
+                <b>Extensions: </b> we can use this algorithm to solve the puzzle with some additional constraints, such as time to transport an object across the river, and we can minimize the total amount of time by letting the weight of each edge to be the amount of time to transport.
                 </p>
+                <p>
+                <b>Efficiency: </b>This implementation is not space and time efficient, however. Suppose we have \(n\) objects, then at most, we have \(2^n\) states, and \(O(2^{2n})\) edges, so the graph needs \(O(2^n)\) time and \(O(2^n)\) space to construct. If Dijkstra's algorithm is used to find the shortest path, the time complexity would be \(O(n2^n)\). Overall, this implementation has the time complexity of \(O(n2^n)\), and the space complexity of \(O(2^n)\).
+                </p>
+            </div>
+        </div>
+
+        <div id="ILP_Shortest_Path_Solution">
+            <div class="header">
+                <p class="title" style="text-align:left;">Solution using the Integer Linear Programming's Shortest Path Formulation
+                <span style="float:right;"><a href="">top</a></span>
+                </p>
+            </div>
+            <div class="content">
+            <pre class="prettyprint">from itertools import product
+from graph import Graph
+from river_crossing import *
+import pulp
+
+g = Graph(directed_graph = True)
+
+# build the graph
+...
+
+# find the shortest path between the first state and the final state
+# -> obtain the minimum number of moves to solve the puzzle
+vertices = g.get_vertices()
+x = pulp.LpVariable.dicts('x', (vertices, vertices), cat = pulp.LpBinary)
+p = pulp.LpProblem(pulp.LpMinimize)
+p += pulp.lpSum([weight * x[u][v] for (u, v, weight) in g.get_edges_iter()])
+for u in set(vertices) - {0b0000, 0b1111}:
+    p += (pulp.lpSum([x[v][u] for v in g.get_in_vertices_iter(u)]) - pulp.lpSum([x[u][v] for v in g.get_out_vertices_iter(u)])) == 0
+p += pulp.lpSum([x[0b0000][v] for v in g.get_out_vertices_iter(0b0000)]) == 1
+p += pulp.lpSum([x[v][0b0000] for v in g.get_in_vertices_iter(0b0000)]) == 0
+p += pulp.lpSum([x[v][0b1111] for v in g.get_in_vertices_iter(0b1111)]) == 1
+p += pulp.lpSum([x[0b1111][v] for v in g.get_out_vertices_iter(0b1111)]) == 0
+
+p.solve()
+# print result
+...</pre>
+            
             </div>
         </div>
         <div id="ILP_Solution">
@@ -170,7 +211,7 @@ ____|        |FWGC</pre>
             </div>
             <div class="content">
             <p>
-            This puzzle can be solved using integer linear programming<a href="#ref1">[1]</a>. The set up is as follows,
+            This puzzle can be solved using integer linear programming<a href="#ref1">[1]</a>. The formulation is as follows,
             </p>
             <table id="constaint_table" style="table-layout: fixed;">
                 <tr>
@@ -360,6 +401,7 @@ p += z[TIME-1][2] == 1
 p.solve()
 print("Status:", pulp.LpStatus[p.status])
 ...</pre>
+        The major bottleneck to generalize the problem using this formulation is to figure out the constraints to avoid illegal states of \(x\), \(y\), and \(z\).
         </div>
         <div id="Generalization">
             <div class="header">
