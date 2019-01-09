@@ -70,7 +70,7 @@
                 </p>
             </div>
             <div class="content">
-                <p>The problem can be solved by exploring all possible moves at each step. Suppose initially, all objects are on the left bank of the river, and the goal is to move all of them to the right bank. To simplify the problem, we ignore the fact there are periods that an object is on the boat, and we only care about the moment that they are on either banks. After a move, an object can only be in two states: either it is on the left bank or on the right bank. Let <code>0</code> indicate the object is on the left bank, and <code>1</code> indicate the object is on the right bank. Let <code>state</code> be a 4-bit variable indicating the positions of all object in the following fashion,
+                <p>The problem can be solved by exploring all possible moves at each step. Suppose that, initially, all objects are on the left bank of the river, and the goal is to move all of them to the right bank. To simplify the problem, we ignore the fact there are periods that an object is on the boat, and we only care about the moment that they are on either banks. After a move, an object can only be in two states: either it is on the left bank or on the right bank. Let <code>0</code> indicate the object is on the left bank, and <code>1</code> indicate the object is on the right bank. Let <code>state</code> be a 4-bit variable indicating the positions of all object in the following fashion,
                 </p>
                 <table style="table-layout: fixed; width: 300px; border-collapse: collapse;" border="1">
                     <tr>
@@ -159,7 +159,7 @@ F_G_|        |_W_C
     |  (FG)->|
 ____|        |FWGC</pre>
                 <p>
-                <b>Extensions: </b> we can use this algorithm to solve the puzzle with some additional constraints, such as time to transport an object across the river, and we can minimize the total amount of time by letting the weight of each edge to be the amount of time to transport.
+                <b>Extensions: </b> This algorithm can solve the puzzle with some additional constraints. One example is constraints of time to transport an object across the river, and we can minimize the total amount of time by letting the weight of each edge to be the amount of time to transport.
                 </p>
                 <p>
                 <b>Efficiency: </b>This implementation is not space and time efficient, however. Suppose we have \(n\) objects, then at most, we have \(2^n\) states, and \(O(2^{2n})\) edges, so the graph needs \(O(2^n)\) time and \(O(2^n)\) space to construct. If Dijkstra's algorithm is used to find the shortest path, the time complexity would be \(O(n2^n)\). Overall, this implementation has the time complexity of \(O(n2^n)\), and the space complexity of \(O(2^n)\).
@@ -174,6 +174,18 @@ ____|        |FWGC</pre>
                 </p>
             </div>
             <div class="content">
+            <table id="constaint_table" style="table-layout: fixed;">
+                <tr>
+                    <td>Objective:</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Constraints:</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
             <pre class="prettyprint">from itertools import product
 from graph import Graph
 from river_crossing import *
@@ -198,7 +210,7 @@ p += pulp.lpSum([x[v][0b1111] for v in g.get_in_vertices_iter(0b1111)]) == 1
 p += pulp.lpSum([x[0b1111][v] for v in g.get_out_vertices_iter(0b1111)]) == 0
 
 p.solve()
-# print result
+# print the result
 ...</pre>
             
             </div>
@@ -211,7 +223,7 @@ p.solve()
             </div>
             <div class="content">
             <p>
-            This puzzle can be solved using integer linear programming<a href="#ref1">[1]</a>. The formulation is as follows,
+            This puzzle can be solved using integer linear programming<a href="#ref1">[1]</a>. The formulation from <a href="#ref1">[1]</a> is as follows,
             </p>
             <table id="constaint_table" style="table-layout: fixed;">
                 <tr>
