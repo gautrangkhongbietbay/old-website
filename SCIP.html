@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Install SCIP on CSIF machines</title>
+        <style>
+            a
+            {
+                color: #3535FF;
+            }
+            .courier
+            {
+                display: inline-block;
+                font-family: "Courier New", Courier, monospace;
+                background-color: #D0D0D0;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Install SCIP on CSIF machine</h3>
+        1. Download the SCIP Optimization Suite from <a href="https://scip.zib.de/index.php#download">SCIP website</a>. I usually download the <a href="https://scip.zib.de/download.php?fname=SCIPOptSuite-6.0.1-Linux.sh">installation script</a>.<br/><br/>
+        2. Install <div class="courier">libgfortran</div> if neccesary. I usually grab the <div class="courier"> libgfortran.so</div> from a Math machine. <br/><br/>
+        3. Since we have no permisson to access <div class="courier"> /usr/lib/</div> folder, we need a way for <div class="courier">SCIP</div> binary to find the library: suppose <div class="courier"> libgfortran.so</div> is in <div class="courier"> ~/lib/</div> folder, we can add <div class="courier">export LD_LIBRARY_PATH=/lib:/usr/lib:~/lib</div> to <div class="courier">~/.bash_profile</div>.
+    </body>
+</html>
